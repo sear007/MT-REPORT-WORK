@@ -1,0 +1,8 @@
+{
+  "name": "MT Field Tracker",
+  "description": "Field work tracking app for MT Company. Records locations between Hand Holes and Poles, captures site photos, and sends reports to Telegram.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
