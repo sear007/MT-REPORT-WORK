@@ -16,26 +16,67 @@ export const LocationCapture: React.FC<LocationCaptureProps> = ({
   value, 
   isActive,
   onActivate,
-  color = "blue",
+  color = "#de8d22",
   icon
 }) => {
-  const activeClass = isActive 
-    ? `border-${color}-500 ring-2 ring-${color}-200 bg-${color}-50` 
-    : 'border-slate-200 hover:bg-slate-50';
+  const isHex = color.startsWith('#');
+
+  // Dynamic Styles
+  const containerStyle = isActive 
+    ? (isHex 
+        ? { borderColor: color, backgroundColor: `${color}0d`, boxShadow: `0 0 0 2px ${color}33` } // Hex styles (0d = 5% opacity, 33 = 20%)
+        : {} // Class-based handled below
+      )
+    : {};
+
+  // Class construction for non-hex colors (backward compatibility)
+  const containerClasses = `w-full group relative overflow-hidden p-3 rounded-xl border-2 transition-all duration-200 text-left ${
+    isActive 
+      ? (isHex ? '' : `border-${color}-500 ring-2 ring-${color}-200 bg-${color}-50`) 
+      : 'border-slate-200 hover:bg-slate-50'
+  }`;
+
+  const iconContainerStyle = {
+    backgroundColor: isActive ? (isHex ? color : undefined) : undefined,
+    color: isActive ? (isHex ? 'white' : undefined) : undefined
+  };
+
+  const iconContainerClasses = `w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+    isActive 
+      ? (isHex ? '' : `bg-${color}-600 text-white`) 
+      : 'bg-slate-100 text-slate-400'
+  }`;
+
+  const labelStyle = {
+    color: isActive ? (isHex ? color : undefined) : undefined
+  };
+
+  const labelClasses = `text-xs font-bold uppercase tracking-wider ${
+    isActive 
+      ? (isHex ? '' : `text-${color}-700`) 
+      : 'text-slate-500'
+  }`;
 
   return (
     <button 
       onClick={onActivate}
       type="button"
-      className={`w-full group relative overflow-hidden p-3 rounded-xl border-2 transition-all duration-200 text-left ${activeClass}`}
+      className={containerClasses}
+      style={containerStyle}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isActive ? `bg-${color}-600 text-white` : 'bg-slate-100 text-slate-400'}`}>
+          <div 
+            className={iconContainerClasses}
+            style={iconContainerStyle}
+          >
             {icon || <MapPin className="w-4 h-4" />}
           </div>
           <div>
-            <div className={`text-xs font-bold uppercase tracking-wider ${isActive ? `text-${color}-700` : 'text-slate-500'}`}>
+            <div 
+              className={labelClasses}
+              style={labelStyle}
+            >
               {label}
             </div>
             {value ? (
@@ -49,7 +90,10 @@ export const LocationCapture: React.FC<LocationCaptureProps> = ({
         </div>
         
         {value ? (
-           <CheckCircle className={`w-5 h-5 ${isActive ? `text-${color}-600` : 'text-green-500'}`} />
+           <CheckCircle 
+             className={`w-5 h-5 ${!isHex ? (isActive ? `text-${color}-600` : 'text-green-500') : ''}`} 
+             style={{ color: isHex ? (isActive ? color : '#22c55e') : undefined }}
+           />
         ) : (
            <CircleDot className={`w-5 h-5 text-slate-300`} />
         )}

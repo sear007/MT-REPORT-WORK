@@ -32,7 +32,7 @@ export const sendTelegramReport = async (
 
   const caption = `
 👷 <b>របាយការណ៍ការងារ MT</b>
-<b>ឈ្មោះការងារ:</b> ${data.name || 'គ្មានឈ្មោះ'}
+<b>ឈ្មោះទីតាំង:</b> ${data.name || 'គ្មានឈ្មោះ'}
 <b>ប្រភេទ:</b> ${data.type}${distanceText}
 
 📍 <b>ចំណុច A (ចាប់ផ្តើម):</b>
@@ -44,9 +44,6 @@ Long: ${data.pointA.longitude.toFixed(6)}
 Lat: ${data.pointB.latitude.toFixed(6)}
 Long: ${data.pointB.longitude.toFixed(6)}
 <a href="https://www.google.com/maps/search/?api=1&query=${data.pointB.latitude},${data.pointB.longitude}">មើលលើផែនទី</a>
-
-🗺️ <b>ផ្លូវ:</b>
-<a href="https://www.google.com/maps/dir/?api=1&origin=${data.pointA.latitude},${data.pointA.longitude}&destination=${data.pointB.latitude},${data.pointB.longitude}">បើកផ្លូវធ្វើដំណើរ</a>
 `;
 
   const formData = new FormData();

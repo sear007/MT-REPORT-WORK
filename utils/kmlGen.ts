@@ -45,8 +45,12 @@ export const generateKML = (data: WorkData): File => {
 </kml>`;
 
   const blob = new Blob([kmlContent], { type: 'application/vnd.google-earth.kml+xml' });
-  // Create a clean filename
-  const filename = `${data.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'work'}.kml`;
+  
+  // Create a clean filename with timestamp YYYYMMDD_HHMMSS
+  const date = new Date();
+  const timestamp = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}_${date.getHours().toString().padStart(2,'0')}${date.getMinutes().toString().padStart(2,'0')}${date.getSeconds().toString().padStart(2,'0')}`;
+  const cleanName = data.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'work';
+  const filename = `${cleanName}_${timestamp}.kml`;
   
   return new File([blob], filename, { type: 'application/vnd.google-earth.kml+xml' });
 };

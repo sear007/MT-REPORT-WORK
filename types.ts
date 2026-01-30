@@ -1,6 +1,6 @@
 export enum WorkType {
-  HAND_HOLE_TO_POLE = 'រន្ធដៃ ➡️ បង្គោល',
-  HAND_HOLE_TO_HAND_HOLE = 'រន្ធដៃ ➡️ រន្ធដៃ',
+  HAND_HOLE_TO_POLE = 'ហូល ➡️ បង្គោល',
+  HAND_HOLE_TO_HAND_HOLE = 'ហូល ➡️ ហូល',
 }
 
 export interface GeoLocation {
@@ -10,12 +10,6 @@ export interface GeoLocation {
   timestamp: number;
 }
 
-export interface AppConfig {
-  telegramBotToken: string;
-  telegramChatId: string;
-  googleMapsApiKey?: string;
-}
-
 export interface WorkData {
   name: string;
   type: WorkType | null;
@@ -23,4 +17,10 @@ export interface WorkData {
   pointB: GeoLocation | null;
   photos: File[];
   distance?: number;
+}
+
+export interface AppConfig {
+  telegramBotToken: string;
+  telegramChatId: string;
+  googleMapsApiKey?: string;
 }

@@ -72,8 +72,8 @@ export const generateSummaryImage = async (data: WorkData, googleApiKey?: string
       const pathCoords = `${data.pointA.latitude},${data.pointA.longitude}|${data.pointB.latitude},${data.pointB.longitude}`;
       mapUrl.searchParams.append('path', `${pathStyle}|${pathCoords}`);
       
-      mapUrl.searchParams.append('markers', `color:blue|label:A|${data.pointA.latitude},${data.pointA.longitude}`);
-      mapUrl.searchParams.append('markers', `color:red|label:B|${data.pointB.latitude},${data.pointB.longitude}`);
+      mapUrl.searchParams.append('markers', `color:orange|label:A|${data.pointA.latitude},${data.pointA.longitude}`);
+      mapUrl.searchParams.append('markers', `color:purple|label:B|${data.pointB.latitude},${data.pointB.longitude}`);
 
       const mapImg = await loadImage(mapUrl.toString());
       if (mapImg.width > 1) { // Check if not the empty fallback
@@ -146,7 +146,7 @@ export const generateSummaryImage = async (data: WorkData, googleApiKey?: string
       ctx.beginPath();
       ctx.moveTo(ax, ay);
       ctx.lineTo(bx, by);
-      ctx.strokeStyle = '#2563eb'; // Blue
+      ctx.strokeStyle = '#de8d22'; // New Primary Color
       ctx.lineWidth = 6;
       ctx.setLineDash([15, 10]);
       ctx.stroke();
@@ -185,8 +185,8 @@ export const generateSummaryImage = async (data: WorkData, googleApiKey?: string
         ctx.restore();
       };
 
-      drawMarker(ax, ay, 'A', '#ef4444'); // Red
-      drawMarker(bx, by, 'B', '#4f46e5'); // Indigo
+      drawMarker(ax, ay, 'A', '#de8d22'); // New Primary
+      drawMarker(bx, by, 'B', '#4f46e5'); // Indigo (Secondary)
 
       mapDrawn = true;
     } catch (err) {
@@ -221,8 +221,6 @@ export const generateSummaryImage = async (data: WorkData, googleApiKey?: string
   // Title
   ctx.textAlign = 'center';
   ctx.fillStyle = '#64748b';
-  // Use a fallback to serif/sans-serif which usually maps to system Khmer font, but standard fonts might be tricky on canvas.
-  // We'll trust the browser to pick a font that supports Khmer unicode if we say 'sans-serif'
   ctx.font = 'bold 24px "Battambang", sans-serif';
   ctx.fillText('កំណត់ត្រាការងារ', contentX, contentStart - 20); // WORK RECORD
 
@@ -239,15 +237,15 @@ export const generateSummaryImage = async (data: WorkData, googleApiKey?: string
 
   // Distance Box
   const dist = data.distance ? data.distance.toFixed(2) : "0.00";
-  ctx.fillStyle = '#eff6ff'; // Blue 50
-  ctx.strokeStyle = '#bfdbfe'; // Blue 200
+  ctx.fillStyle = '#fff7ed'; // Orange 50
+  ctx.strokeStyle = '#fed7aa'; // Orange 200
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.roundRect(contentX - 150, contentStart + 130, 300, 70, 35);
   ctx.fill();
   ctx.stroke();
 
-  ctx.fillStyle = '#1d4ed8'; // Blue 700
+  ctx.fillStyle = '#de8d22'; // New Primary
   ctx.font = 'bold 44px monospace';
   ctx.textBaseline = 'middle';
   ctx.fillText(`${dist} m`, contentX, contentStart + 167);
