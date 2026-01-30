@@ -1,6 +1,6 @@
 export enum WorkType {
-  HAND_HOLE_TO_POLE = 'Hand Hole ➡️ Pole',
-  HAND_HOLE_TO_HAND_HOLE = 'Hand Hole ➡️ Hand Hole',
+  HAND_HOLE_TO_POLE = 'រន្ធដៃ ➡️ បង្គោល',
+  HAND_HOLE_TO_HAND_HOLE = 'រន្ធដៃ ➡️ រន្ធដៃ',
 }
 
 export interface GeoLocation {

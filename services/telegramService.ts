@@ -27,26 +27,26 @@ export const sendTelegramReport = async (
   }
 
   const distanceText = data.distance 
-    ? `\n📏 <b>Distance:</b> ${data.distance.toFixed(2)}m` 
+    ? `\n📏 <b>ចម្ងាយ:</b> ${data.distance.toFixed(2)}m` 
     : '';
 
   const caption = `
-👷 <b>MT Work Report</b>
-<b>Job:</b> ${data.name || 'Untitled'}
-<b>Scope:</b> ${data.type}${distanceText}
+👷 <b>របាយការណ៍ការងារ MT</b>
+<b>ឈ្មោះការងារ:</b> ${data.name || 'គ្មានឈ្មោះ'}
+<b>ប្រភេទ:</b> ${data.type}${distanceText}
 
-📍 <b>Point A (Start):</b>
+📍 <b>ចំណុច A (ចាប់ផ្តើម):</b>
 Lat: ${data.pointA.latitude.toFixed(6)}
 Long: ${data.pointA.longitude.toFixed(6)}
-<a href="https://www.google.com/maps/search/?api=1&query=${data.pointA.latitude},${data.pointA.longitude}">View on Map</a>
+<a href="https://www.google.com/maps/search/?api=1&query=${data.pointA.latitude},${data.pointA.longitude}">មើលលើផែនទី</a>
 
-📍 <b>Point B (End):</b>
+📍 <b>ចំណុច B (បញ្ចប់):</b>
 Lat: ${data.pointB.latitude.toFixed(6)}
 Long: ${data.pointB.longitude.toFixed(6)}
-<a href="https://www.google.com/maps/search/?api=1&query=${data.pointB.latitude},${data.pointB.longitude}">View on Map</a>
+<a href="https://www.google.com/maps/search/?api=1&query=${data.pointB.latitude},${data.pointB.longitude}">មើលលើផែនទី</a>
 
-🗺️ <b>Route:</b>
-<a href="https://www.google.com/maps/dir/?api=1&origin=${data.pointA.latitude},${data.pointA.longitude}&destination=${data.pointB.latitude},${data.pointB.longitude}">Open Route</a>
+🗺️ <b>ផ្លូវ:</b>
+<a href="https://www.google.com/maps/dir/?api=1&origin=${data.pointA.latitude},${data.pointA.longitude}&destination=${data.pointB.latitude},${data.pointB.longitude}">បើកផ្លូវធ្វើដំណើរ</a>
 `;
 
   const formData = new FormData();

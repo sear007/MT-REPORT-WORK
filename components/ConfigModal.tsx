@@ -25,7 +25,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose, confi
         <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
           <div className="flex items-center gap-2 text-slate-700">
             <Settings className="w-5 h-5" />
-            <h2 className="font-bold text-lg">Settings</h2>
+            <h2 className="font-bold text-lg">ការកំណត់</h2>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500">
             <X className="w-5 h-5" />
@@ -58,7 +58,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose, confi
           <div className="pt-4 border-t border-slate-100">
             <div className="flex items-center gap-2 mb-2 text-slate-800 font-semibold">
               <Map className="w-4 h-4" />
-              <h3>Google Maps (Optional)</h3>
+              <h3>Google Maps (ជាជម្រើស)</h3>
             </div>
             <label className="block text-sm font-medium text-slate-700 mb-1">API Key</label>
             <input
@@ -69,13 +69,13 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose, confi
               className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
             />
             <p className="text-xs text-slate-500 mt-1">
-              Required for Satellite Image generation. Enable <strong>Static Maps API</strong> in Google Cloud Console.
+              ត្រូវការសម្រាប់ការបង្កើតរូបភាពផ្កាយរណប។ សូមបើក <strong>Static Maps API</strong> នៅក្នុង Google Cloud Console។
             </p>
           </div>
         </div>
 
         <div className="p-4 border-t border-slate-100 bg-slate-50 flex gap-3">
-          <Button variant="outline" fullWidth onClick={onClose}>Cancel</Button>
+          <Button variant="outline" fullWidth onClick={onClose}>បោះបង់</Button>
           <Button 
             variant="primary" 
             fullWidth 
@@ -85,7 +85,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose, confi
             }}
             icon={<Save className="w-4 h-4" />}
           >
-            Save Config
+            រក្សាទុក
           </Button>
         </div>
       </div>

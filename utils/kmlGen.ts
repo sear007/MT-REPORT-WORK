@@ -22,19 +22,19 @@ export const generateKML = (data: WorkData): File => {
       </LineStyle>
     </Style>
     <Placemark>
-      <name>Point A (Start)</name>
+      <name>ចំណុច A (ចាប់ផ្តើម)</name>
       <Point>
         <coordinates>${coordsA}</coordinates>
       </Point>
     </Placemark>
     <Placemark>
-      <name>Point B (End)</name>
+      <name>ចំណុច B (បញ្ចប់)</name>
       <Point>
         <coordinates>${coordsB}</coordinates>
       </Point>
     </Placemark>
     <Placemark>
-      <name>Connection Route</name>
+      <name>ខ្សែតភ្ជាប់</name>
       <styleUrl>#lineStyle</styleUrl>
       <LineString>
         <tessellate>1</tessellate>

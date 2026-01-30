@@ -1,6 +1,6 @@
 {
   "name": "MT Field Tracker",
-  "description": "Field work tracking app for MT Company. Records locations between Hand Holes and Poles, captures site photos, and sends reports to Telegram.",
+  "description": "កម្មវិធីតាមដានការងារនៅការដ្ឋានសម្រាប់ក្រុមហ៊ុន MT។ កត់ត្រាទីតាំងរវាងរន្ធដៃនិងបង្គោល, ចាប់យករូបភាពការដ្ឋាន, និងផ្ញើរបាយការណ៍ទៅ Telegram។",
   "requestFramePermissions": [
     "camera",
     "geolocation"

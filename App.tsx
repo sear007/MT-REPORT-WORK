@@ -10,7 +10,10 @@ import {
   ArrowRightLeft,
   X,
   Plus,
-  Ruler
+  Ruler,
+  RefreshCw,
+  MapPin,
+  Target
 } from 'lucide-react';
 import { WorkType, WorkData, AppConfig } from './types';
 import { ConfigModal } from './components/ConfigModal';
@@ -20,13 +23,14 @@ import { sendTelegramReport } from './services/telegramService';
 import { calculateDistance } from './utils/geo';
 import { generateSummaryImage } from './utils/imageGen';
 import { generateKML } from './utils/kmlGen';
+import { LocationPickerMap } from './components/LocationPickerMap';
 
 const STORAGE_KEY_CONFIG = 'mt_app_config';
 
 const DEFAULT_CONFIG: AppConfig = {
   telegramBotToken: '8014722410:AAEBYDTO2y-dz1Qb3sjOLMphvKq8H18K5_A',
   telegramChatId: '-1003023753695',
-  googleMapsApiKey: '', // Optional default
+  googleMapsApiKey: '', 
 };
 
 const App: React.FC = () => {
@@ -44,6 +48,10 @@ const App: React.FC = () => {
     photos: [],
     distance: undefined,
   });
+
+  // Map & Location State
+  const [activeTarget, setActiveTarget] = useState<'A' | 'B'>('A');
+  const [isManualDistance, setIsManualDistance] = useState(false);
 
   // UI State
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,13 +75,13 @@ const App: React.FC = () => {
 
   // Distance Calculation
   useEffect(() => {
-    if (workData.pointA && workData.pointB) {
+    if (!isManualDistance && workData.pointA && workData.pointB) {
       const dist = calculateDistance(workData.pointA, workData.pointB);
       setWorkData(prev => ({ ...prev, distance: dist }));
-    } else {
-      setWorkData(prev => ({ ...prev, distance: undefined }));
+    } else if (!workData.pointA || !workData.pointB) {
+       if (!isManualDistance) setWorkData(prev => ({ ...prev, distance: undefined }));
     }
-  }, [workData.pointA, workData.pointB]);
+  }, [workData.pointA, workData.pointB, isManualDistance]);
 
   // Clean up object URLs
   useEffect(() => {
@@ -89,7 +97,7 @@ const App: React.FC = () => {
 
   const startProcess = (type: WorkType) => {
     if (!config.telegramBotToken || !config.telegramChatId) {
-      alert("Please configure Telegram settings first!");
+      alert("សូមកំណត់ Telegram ជាមុនសិន!"); // Please configure Telegram first
       setIsConfigOpen(true);
       return;
     }
@@ -103,7 +111,23 @@ const App: React.FC = () => {
     });
     setPhotoPreviews([]);
     setErrorMsg(null);
+    setIsManualDistance(false);
+    setActiveTarget('A'); // Reset to Point A
     setView('PROCESS');
+  };
+
+  const handleLocationUpdate = (target: 'A' | 'B', lat: number, lng: number) => {
+    const newLoc = {
+      latitude: lat,
+      longitude: lng,
+      accuracy: 5,
+      timestamp: Date.now()
+    };
+
+    setWorkData(prev => ({
+      ...prev,
+      [target === 'A' ? 'pointA' : 'pointB']: newLoc
+    }));
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,15 +153,15 @@ const App: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!workData.name) {
-      setErrorMsg("Please enter a work name.");
+      setErrorMsg("សូមបញ្ចូលឈ្មោះការងារ។"); // Please enter a work name
       return;
     }
     if (!workData.pointA || !workData.pointB) {
-      setErrorMsg("Please capture both location points.");
+      setErrorMsg("សូមចាប់យកចំណុចទីតាំងទាំងពីរ។"); // Please capture both points
       return;
     }
     if (workData.photos.length === 0) {
-      setErrorMsg("Please take at least one photo.");
+      setErrorMsg("សូមថតរូបយ៉ាងហោចណាស់មួយ។"); // Please take at least one photo
       return;
     }
 
@@ -145,19 +169,14 @@ const App: React.FC = () => {
     setErrorMsg(null);
 
     try {
-      // 1. Generate Summary Image (Satellite if API key exists, else Schematic)
       const summaryImage = await generateSummaryImage(workData, config.googleMapsApiKey);
-      
-      // 2. Generate KML
       const kmlFile = generateKML(workData);
       
-      // 3. Prepare Data (Summary Image is First)
       const dataToSend = {
         ...workData,
         photos: [summaryImage, ...workData.photos]
       };
 
-      // 4. Send
       await sendTelegramReport(
         config.telegramBotToken, 
         config.telegramChatId, 
@@ -168,7 +187,7 @@ const App: React.FC = () => {
       setView('SUCCESS');
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(`Failed to send report: ${err.message}`);
+      setErrorMsg(`បរាជ័យក្នុងការផ្ញើរបាយការណ៍: ${err.message}`); // Failed to send report
     } finally {
       setIsSubmitting(false);
     }
@@ -182,7 +201,7 @@ const App: React.FC = () => {
             <Cable className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">MT Field Tracker</h1>
-          <p className="text-slate-500 text-lg max-w-xs mx-auto">Select a work scope to begin recording field data.</p>
+          <p className="text-slate-500 text-lg max-w-xs mx-auto">ជ្រើសរើសវិសាលភាពការងារដើម្បីចាប់ផ្តើមកត់ត្រាទិន្នន័យ។</p>
         </div>
 
         <div className="w-full max-w-sm space-y-4">
@@ -197,8 +216,8 @@ const App: React.FC = () => {
               <span className="inline-block p-2 bg-blue-100 rounded-lg text-blue-600 mb-3">
                 <Cable className="w-6 h-6" />
               </span>
-              <h3 className="text-xl font-bold text-slate-800">Hand Hole ➡️ Pole</h3>
-              <p className="text-slate-500 mt-1">Record connection between underground and pole.</p>
+              <h3 className="text-xl font-bold text-slate-800">រន្ធដៃ ➡️ បង្គោល</h3>
+              <p className="text-slate-500 mt-1">កត់ត្រាការតភ្ជាប់រវាងក្រោមដីនិងបង្គោល។</p>
             </div>
           </button>
 
@@ -213,8 +232,8 @@ const App: React.FC = () => {
               <span className="inline-block p-2 bg-indigo-100 rounded-lg text-indigo-600 mb-3">
                 <ArrowRightLeft className="w-6 h-6" />
               </span>
-              <h3 className="text-xl font-bold text-slate-800">Hand Hole ➡️ Hand Hole</h3>
-              <p className="text-slate-500 mt-1">Record connection between two underground points.</p>
+              <h3 className="text-xl font-bold text-slate-800">រន្ធដៃ ➡️ រន្ធដៃ</h3>
+              <p className="text-slate-500 mt-1">កត់ត្រាការតភ្ជាប់រវាងចំណុចក្រោមដីពីរ។</p>
             </div>
           </button>
         </div>
@@ -224,68 +243,116 @@ const App: React.FC = () => {
 
   const renderProcess = () => (
     <div className="max-w-xl mx-auto pb-24 animate-in slide-in-from-right duration-300">
-      <div className="bg-white sticky top-0 z-10 px-4 py-4 shadow-sm border-b border-slate-100 flex items-center gap-3">
-        <button 
-          onClick={() => setView('HOME')}
-          className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6 text-slate-600" />
-        </button>
-        <div>
-          <h2 className="font-bold text-slate-800 text-lg leading-tight">New Report</h2>
-          <p className="text-xs text-slate-500 font-medium">{workData.type}</p>
+      <div className="bg-white sticky top-0 z-30 px-4 py-3 shadow-sm border-b border-slate-100 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setView('HOME')}
+            className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6 text-slate-600" />
+          </button>
+          <div>
+            <h2 className="font-bold text-slate-800 text-base leading-tight">របាយការណ៍ថ្មី</h2>
+            <p className="text-xs text-slate-500 font-medium">{workData.type}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+           {/* Compact Distance Display in Header */}
+           {workData.distance !== undefined && (
+             <div className="px-2 py-1 bg-slate-100 rounded text-xs font-mono font-bold text-slate-600">
+                {workData.distance.toFixed(1)}m
+             </div>
+           )}
         </div>
       </div>
 
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-4">
         {/* Name Input */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-3">
-          <label className="block text-sm font-bold text-slate-700">Work Name / ID</label>
+        <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">ឈ្មោះការងារ / ID</label>
           <input
             type="text"
             value={workData.name}
             onChange={(e) => setWorkData(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="e.g. Route A-123 Maintenance"
-            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
+            placeholder="ឧទាហរណ៍: Route A-123"
+            className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium"
           />
         </div>
 
-        {/* Locations */}
-        <div className="space-y-4">
-          <LocationCapture
-            label="Point A (Start)"
-            value={workData.pointA}
-            onChange={(loc) => setWorkData(prev => ({ ...prev, pointA: loc }))}
-            color="blue"
+        {/* Embedded Map */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+             <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <Target className="w-4 h-4 text-blue-600" /> 
+                ផែនទីទីតាំង
+             </label>
+             <span className="text-xs text-slate-400">អូសផែនទីដើម្បីកំណត់ ចំណុច {activeTarget}</span>
+          </div>
+          
+          <LocationPickerMap
+            activeTarget={activeTarget}
+            pointA={workData.pointA}
+            pointB={workData.pointB}
+            onLocationUpdate={handleLocationUpdate}
+            onTargetChange={setActiveTarget}
           />
           
-          {/* Connector Line & Distance */}
-          <div className="flex flex-col items-center justify-center -my-2">
-             <div className="h-4 w-0.5 bg-slate-300"></div>
-             {workData.distance !== undefined ? (
-               <div className="bg-slate-800 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-10 flex items-center gap-1.5 animate-in zoom-in">
-                 <Ruler className="w-3 h-3" />
-                 {workData.distance.toFixed(2)} m
-               </div>
-             ) : (
-               <div className="h-2 w-0.5 bg-slate-300"></div>
-             )}
-             <div className="h-4 w-0.5 bg-slate-300"></div>
+          {/* Point Selectors */}
+          <div className="grid grid-cols-1 gap-3">
+             <div className="relative">
+                <LocationCapture 
+                  label="ចំណុច A (ចាប់ផ្តើម)" 
+                  value={workData.pointA} 
+                  isActive={activeTarget === 'A'}
+                  onActivate={() => setActiveTarget('A')}
+                  color="blue"
+                  icon={<span className="font-bold">A</span>}
+                />
+                 {/* Connection Line Visual between cards */}
+                <div className="absolute left-7 -bottom-4 w-0.5 h-4 bg-slate-200 z-10"></div>
+             </div>
+             
+             <LocationCapture 
+                  label="ចំណុច B (បញ្ចប់)" 
+                  value={workData.pointB} 
+                  isActive={activeTarget === 'B'}
+                  onActivate={() => setActiveTarget('B')}
+                  color="indigo"
+                  icon={<span className="font-bold">B</span>}
+              />
           </div>
+        </div>
 
-          <LocationCapture
-            label="Point B (End)"
-            value={workData.pointB}
-            onChange={(loc) => setWorkData(prev => ({ ...prev, pointB: loc }))}
-            color="indigo"
-          />
+        {/* Manual Distance Override (Optional) */}
+        <div className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-100">
+            <span className="text-xs text-slate-500 font-medium">ចម្ងាយគណនា</span>
+            <div className="flex items-center gap-2">
+               <Ruler className="w-3 h-3 text-slate-400" />
+               <input 
+                 type="number" 
+                 value={workData.distance !== undefined ? Math.round(workData.distance * 100) / 100 : ''}
+                 onChange={(e) => {
+                   setIsManualDistance(true);
+                   const val = parseFloat(e.target.value);
+                   setWorkData(prev => ({ ...prev, distance: isNaN(val) ? undefined : val }));
+                 }}
+                 placeholder="0.00"
+                 className="bg-transparent text-right font-mono font-bold w-20 outline-none border-b border-slate-300 focus:border-blue-500"
+               />
+               <span className="text-xs text-slate-400">m</span>
+               {isManualDistance && (
+                 <button onClick={() => setIsManualDistance(false)} className="text-slate-400 hover:text-slate-600">
+                   <RefreshCw className="w-3 h-3" />
+                 </button>
+               )}
+            </div>
         </div>
 
         {/* Photo Upload */}
         <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-3">
-             <label className="block text-sm font-bold text-slate-700">Site Photos</label>
-             <span className="text-xs text-slate-400">{workData.photos.length} photo(s)</span>
+             <label className="block text-sm font-bold text-slate-700">រូបភាពការដ្ឋាន</label>
+             <span className="text-xs text-slate-400">{workData.photos.length} រូប</span>
           </div>
           
           <input
@@ -311,7 +378,6 @@ const App: React.FC = () => {
               </div>
             ))}
 
-            {/* Add Button */}
             <label 
               htmlFor="photo-upload" 
               className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 cursor-pointer transition-all active:scale-95"
@@ -320,7 +386,7 @@ const App: React.FC = () => {
                 {photoPreviews.length > 0 ? <Plus className="w-5 h-5 text-blue-600" /> : <Camera className="w-5 h-5 text-blue-600" />}
               </div>
               <span className="text-xs font-medium text-slate-600 text-center px-1">
-                {photoPreviews.length > 0 ? "Add More" : "Take Photo"}
+                {photoPreviews.length > 0 ? "បន្ថែម" : "ថតរូប"}
               </span>
             </label>
           </div>
@@ -336,7 +402,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30">
         <div className="max-w-xl mx-auto">
           <Button 
             fullWidth 
@@ -344,7 +410,7 @@ const App: React.FC = () => {
             disabled={isSubmitting}
             icon={isSubmitting ? undefined : <Send className="w-4 h-4" />}
           >
-            {isSubmitting ? 'Sending Report...' : 'Finish & Send Report'}
+            {isSubmitting ? 'កំពុងផ្ញើ...' : 'បញ្ចប់ & ផ្ញើរបាយការណ៍'}
           </Button>
         </div>
       </div>
@@ -356,14 +422,14 @@ const App: React.FC = () => {
       <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
         <CheckCircle2 className="w-12 h-12 text-green-600" />
       </div>
-      <h2 className="text-2xl font-bold text-slate-800 mb-2">Report Sent!</h2>
+      <h2 className="text-2xl font-bold text-slate-800 mb-2">របាយការណ៍បានផ្ញើ!</h2>
       <p className="text-slate-500 mb-8 max-w-xs">
-        Your work data, satellite summary, and KML file have been successfully uploaded.
+        ទិន្នន័យការងារ រូបភាពផ្កាយរណប និងឯកសារ KML ត្រូវបានបង្ហោះដោយជោគជ័យ។
       </p>
       
       <div className="w-full max-w-xs space-y-3">
         <Button onClick={() => setView('HOME')} fullWidth>
-          Back to Home
+          ត្រឡប់ទៅដើម
         </Button>
         <Button 
           variant="outline" 
@@ -373,7 +439,7 @@ const App: React.FC = () => {
             startProcess(workData.type!);
           }}
         >
-          Start Another {workData.type === WorkType.HAND_HOLE_TO_POLE ? 'Pole' : 'Hand Hole'} Job
+          ចាប់ផ្តើមការងារ {workData.type === WorkType.HAND_HOLE_TO_POLE ? 'បង្គោល' : 'រន្ធដៃ'} មួយទៀត
         </Button>
       </div>
     </div>
